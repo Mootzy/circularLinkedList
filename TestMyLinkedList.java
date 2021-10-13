@@ -1,5 +1,7 @@
 package Liang._chpt24;
 
+import org.w3c.dom.Node;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,14 +71,16 @@ public class TestMyLinkedList {
 //      System.out.print(s.toUpperCase()+" ");
 //    System.out.println(list.size());
 
-    //System.out.println(list.size());
-    System.out.println("\n Set isiah to 5 index");
-    list.set(5, "isiah");
-    System.out.println(" after set method");
+    //debugging code for .set Method
+      //System.out.println(list.size());
+//    System.out.println("\n Set isiah to 5 index");
+//    list.set(5, "isiah");
+//    System.out.println(" after set method");
+//
+//    for (String s : list){
+//      System.out.print(s.toLowerCase()+" ");
+//    }
 
-    for (String s : list){
-      System.out.print(s.toLowerCase()+" ");
-    }
 
     list.clear();
     System.out.println("\nAfter clearing the list, the list size is " 

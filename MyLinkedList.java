@@ -1,23 +1,16 @@
 package Liang._chpt24;
 
-
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.function.Consumer;
-
 public class MyLinkedList<E> implements MyList<E> {
 
-/**
- * Structure used to form the list.
- * @author bobgils
- * @param <E> - type of data element stored in node.
- */
-class Node<E> {
+  /**
+   * Structure used to form the list.
+   *
+   * @param <E> - type of data element stored in node.
+   */
+
+  static class Node<E> {
     E element;
-    Node<E> next, prev;
+    Node<E> next;
 
     /**
      * @param element
@@ -25,123 +18,20 @@ class Node<E> {
     public Node(E element) {
       this.element = element;
     }
-
-  public E getElement() {
-    return element;
   }
-}
-  private Node<E> head, tail, rear;
+
+  private Node<E> rear;//create ref node
+
   private int size = 0; // Number of elements in the list
 
-  public int getSize(){
-    return size;
-  }
   /** Create an empty list */
   public MyLinkedList() {
   }
 
-
   /** Create a list from an array of objects */
   public MyLinkedList(E[] objects) {
-    for (int i = 0; i < objects.length; i++)
-      add(objects[i]);
-  }
-
-  @Override
-  public boolean contains(Object e) {
-    if (e == this) return true;
-    else return false;
-  }
-
-  /** Return the element at the specified index */
-  @Override
-  public E get(int index) {
-    Node<E> found = rear;
-    int current = 0;
-
-
-    if (index > size || index < 0){
-      throw new IndexOutOfBoundsException();
-    }
-    while (current != index){
-      found = found.next;
-      current++;
-    }
-
-    return found.getElement();
-  }
-
-  /** Return the index of the head matching element in
-   *  this list. Return -1 if no match. */
-  @Override
-  public int indexOf(Object e) {
-
-    int index = 0;
-    Node<E> current = rear;
-
-    while (current.getElement() !=e && current.getElement()!= null){
-      if (current.equals(e)){
-        return index;
-      }
-      index++;
-      current=current.next;
-    }
-    // Left as an exercise
-    return index;
-  }
-
-  /** Return the index of the last matching element in
-   *  this list. Return -1 if no match. */
-  @Override
-  public int lastIndexOf(E e) {
-    // Left as an exercise
-    //point node to rear
-    Node<E> current = rear;
-
-    int found = 0;
-
-
-
-    //iterate over nodes in list,
-    for (int i = 0; current.next != null; i++){
-      if (current.getElement() == e){
-        found += i;
-      }
-      current = current.next;
-    }
-    return found;
-
-  }
-
-  /** Replace the element at the specified position
-   *  in this list with the specified element. */
-  @Override
-  //wasn't sure wether to approach index in traditional 0 = 1 format or logical real number n => 1 format for index,
-  //used n >= 1, ex: set(1, "hi") = ["hi","world"]
-  public E set(int index, E e) {
-    Node <E> current = rear;
-    Node <E> setNode = new Node<E>(e);
-    index = index -1;
-
-    if (index == 0 || index == -1){
-     this.addFirst(e);
-
-    }
-    else if (index == this.size){
-      this.addLast(e);
-    }
-    else {
-      for (int i = 0; current != null && i < (index - 1); i++){
-        current = current.next;
-      }
-
-      Node<E> temp = current.next;
-      current.next = setNode;
-      setNode.next =temp;
-    }
-
-
-    return setNode.getElement();
+    for (E e : objects)
+      add(e);
   }
 
   /** Return the head element in the list */
@@ -150,8 +40,7 @@ class Node<E> {
       return null;
     }
     else {
-      rear.element = head.element;
-      return rear.element;
+      return rear.next.element;
     }
   }
 
@@ -161,7 +50,6 @@ class Node<E> {
       return null;
     }
     else {
-      rear.element = tail.element;
       return rear.element;
     }
   }
@@ -169,27 +57,31 @@ class Node<E> {
   /** Add an element to the beginning of the list */
   public void addFirst(E e) {
     Node<E> newNode = new Node<>(e); // Create a new node
-    newNode.next = head; // link the new node with the head
-    head = newNode; // head points to the new node
-    rear = head;
-    size++; // Increase list size
 
-    if (tail == null) // the new node is the only node in list
-      tail = rear;
+    if (rear == null) { // the new node is the only node in list
+      rear = newNode;
+      rear.next = rear;
+      size++;
+      return;
+    }
+
+    newNode.next = rear.next; // link the new node with the head
+    rear.next = newNode; // head points to the new node
+    size++; // Increase list size
   }
 
   /** Add an element to the end of the list */
   public void addLast(E e) {
     Node<E> newNode = new Node<>(e); // Create a new for element e
+    Node<E> head = rear.next;
 
-    //bug occuring here
-    if (tail == null) {
-      head = tail = newNode;
-      rear = newNode;// The new node is the only node in list
+    if (rear == null) {
+      rear.next = rear = newNode; // The new node is the only node in list
     }
     else {
-      tail.next = newNode; // Link the new with the last node
-      tail = newNode; // tail now points to the last node
+      rear.next = newNode; // Link the new with the last node
+      rear = rear.next; // tail now points to the last node
+      rear.next = head;
     }
 
     size++; // Increase size
@@ -206,7 +98,7 @@ class Node<E> {
       addLast(e);
     }
     else {
-      Node<E> current = head;
+      Node<E> current = rear.next;
       for (int i = 1; i < index; i++) {
         current = current.next;
       }
@@ -222,26 +114,17 @@ class Node<E> {
   public E removeFirst() {
     if (size == 0) {
       return null;
-    } else {
-      Node<E> temp = head;
-      head = head.next;
-      size--;
-      if (head == null) {
-        return temp.element;
-      }
     }
-    return null;
+    else {
+      E temp = rear.next.element;
+      rear.next = rear.next.next;
+      size--;
+      if (rear.next == null) {
+        rear = null;
+      }
+      return temp;
+    }
   }
-//    else {
-//      E temp = rear.element;
-//      head = rear.next;
-//      size--;
-//      if (head == null) {
-//        tail = null;
-//      }
-//      return temp;
-//    }
-
 
   /** Remove the last node and
    * return the object that is contained in the removed node. */
@@ -250,21 +133,22 @@ class Node<E> {
       return null;
     }
     else if (size == 1) {
-      E temp = head.element;
-      head = tail = null;
+      E temp = rear.next.element;
+      rear.next = rear = null;
       size = 0;
       return temp;
     }
     else {
-      Node<E> current = head;
+      Node<E> current = rear.next;
+      Node <E> head = rear.next;
 
       for (int i = 0; i < size - 2; i++) {
         current = current.next;
       }
 
-      E temp = tail.element;
-      tail = current;
-      tail.next = null;
+      E temp = rear.element;
+      rear = current;
+      rear.next = head;
       size--;
       return temp;
     }
@@ -284,7 +168,7 @@ class Node<E> {
       return removeLast();
     }
     else {
-      Node<E> previous = head;
+      Node<E> previous = rear.next;
 
       for (int i = 1; i < index; i++) {
         previous = previous.next;
@@ -302,11 +186,12 @@ class Node<E> {
   public String toString() {
     StringBuilder result = new StringBuilder("[");
 
-    Node<E> current = head;
+    Node<E> current = rear.next;
+
     for (int i = 0; i < size; i++) {
       result.append(current.element);
       current = current.next;
-      if (current != null) {
+      if (current != rear.next) {
         result.append(", "); // Separate two elements with a comma
       }
       else {
@@ -321,11 +206,88 @@ class Node<E> {
   @Override
   public void clear() {
     size = 0;
-    head = tail = null;
+    rear.next = rear = null;
   }
 
   /** Return true if this list contains the element e */
+  @Override
+  public boolean contains(Object e) {
+    for (E t : this) {
+      if (e == t) {
+        return true;
+      }
+    }
+    return false;
+  }
 
+  /** Return the element at the specified index */
+  @Override
+  public E get(int index) {
+    //Iterate index times then return
+    Node<E> current = rear.next;
+    for (int i = 0; i < index; i++) {
+      current = current.next;
+    }
+    return current.element;
+  }
+
+  /** Return the index of the head matching element in
+   *  this list. Return -1 if no match. */
+  @Override
+  public int indexOf(Object e) {
+    Node<E> current = rear.next;
+    for (int i = 0; i < this.size(); i++) {
+      if (current.element == e) {
+        return i;
+      } else {
+        current = current.next;
+      }
+    }
+    return -1;
+  }
+
+  /** Return the index of the last matching element in
+   *  this list. Return -1 if no match. */
+  @Override
+  public int lastIndexOf(E e) {
+    Node<E> current = rear.next;
+    int lastIndexFound = -1;
+    for (int i = 0; i < this.size(); i++) {
+      if (current.element == e) {
+        lastIndexFound = i;
+      }
+      current = current.next;
+    }
+    return lastIndexFound;
+  }
+
+  /** Replace the element at the specified position
+   *  in this list with the specified element. */
+  @Override
+  public E set(int index, E e) {
+    Node<E> current = rear.next;
+    Node<E> previous = rear.next;
+    Node<E> temp = rear.next;
+    Node<E> newNode = new Node<>(e);
+    if (rear.next == null && rear == null) {
+      return null;
+    } else if (index >= this.size()) {
+      return null;
+    } else if (rear.next == rear && index == 0) {
+      newNode.next = null;
+      rear.next = rear = newNode;
+      return temp.element;
+    } else {
+      for (int i = 0; i < index - 1; i++) {
+        previous = previous.next;
+      }
+      current = previous.next;
+      temp = current;
+      newNode.next = current.next;
+      previous.next = newNode;
+      return temp.element;
+    }
+  }
 
   /** Override iterator() defined in Iterable */
   @Override
@@ -334,26 +296,43 @@ class Node<E> {
   }
 
   private class LinkedListIterator
-      implements java.util.Iterator<E> {
-    private Node<E> current = head; // Current index
+          implements java.util.Iterator<E> {
+    private Node<E> current = rear.next; // Current index
+    private boolean atStart = true;
 
     @Override
     public boolean hasNext() {
-      return (current != null);
+      if (current == rear.next && !atStart) {
+        return false;
+      }
+      return true;
     }
 
     @Override
     public E next() {
       E e = current.element;
+      atStart = false;
       current = current.next;
       return e;
     }
 
     @Override
     public void remove() {
-      E e = current.element;
-      current = current.next;
-      e = null;
+      // Left as an exercise
+      if (rear.next == null) {
+        return;
+      } else if (current == rear.next && current == rear) {
+        current = null;
+        size = 0;
+      } else {
+        Node<E> previous = rear.next;
+        while (previous.next != current) {
+          previous = previous.next;
+        }
+        previous.next = current.next;
+        current = null;
+        size--;
+      }
     }
   }
 
